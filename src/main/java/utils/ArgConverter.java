@@ -1,6 +1,7 @@
 package utils;
 
 
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
 public class ArgConverter {
@@ -14,7 +15,7 @@ public class ArgConverter {
      * **optional** @param {String} args[2] language to which we want to translate - defaults to `en`
      * @return formatted arguments
      */
-    public static Args convert(String[] args) throws IllegalArgumentException, URISyntaxException {
+    public static Args convert(String[] args) throws IllegalArgumentException, MalformedURLException {
         String url;
         Integer depth;
         String language;

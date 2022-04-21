@@ -1,21 +1,26 @@
 package utils;
 
-import java.net.URI;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Locale;
 
 /**
  * class to hold parameters for webcrawler
  */
 public class Args {
-    public final URI url;
+    public final String url;
     public final Integer depth;
     public final Locale language;
 
 
-    public Args(String url, Integer depth, String language) throws IllegalArgumentException, URISyntaxException {
+    public Args(String url, Integer depth, String language) throws IllegalArgumentException,  MalformedURLException {
+        // check for valid depth
         if(depth < 0) throw new IllegalArgumentException("depth must be greater or equal to 0.");
-        this.url = new URI(url);
+        // check for valid uri
+        new URL(url);
+
+        this.url = url;
         this.depth = depth;
         this.language = new Locale(language);
     }
