@@ -2,7 +2,6 @@ package utils;
 
 
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 
 public class ArgConverter {
 

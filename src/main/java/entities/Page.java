@@ -4,15 +4,13 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import utils.Args;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
-import java.util.ArrayList;
 
 /**
- * Represents a webpage with all headings & links
+ * Represents a webpage with all headings & subpages
  */
 public class Page {
     public final String url;
@@ -24,7 +22,7 @@ public class Page {
     }
 
     /**
-     * gets all headings for this page, as well as for #level-subpages
+     * gets all headings for this page, as well as for further subpages
      *
      * @param level to which we want to crawl for further subpages
      * @throws IOException
@@ -92,4 +90,53 @@ public class Page {
             return true;
         }
     }
+
+    private String convertToMarkdown(int level) {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        // print headings
+        for (Heading heading : headings) stringBuilder.append(convertToMarkdownHeading(heading) + "\n");
+
+        // print subpages
+        for (Page subpage : subpages) {
+            // print subpage heading
+            if (subpage.isLinkBroken()) stringBuilder.append(prependBrTag("broken link" + wrapLinkInATag(subpage.url) + "\n"));
+            else stringBuilder.append(prependBrTag("--> link to:" + wrapLinkInATag(subpage.url) + "\n"));
+
+            // as long as we are not at the end of recursion, print subpages too
+            if (level > 0 && !subpage.isLinkBroken()) stringBuilder.append(subpage.convertToMarkdown(level - 1));
+        }
+        return stringBuilder.toString();
+
+    }
+
+    public String convertToMarkdown(Args args, String filename) {
+        StringBuilder stringBuilder = new StringBuilder();
+        // prepend metadata
+        stringBuilder.append("input: " + wrapLinkInATag(args.url) + "\n");
+        stringBuilder.append(prependBrTag("depth: ") + args.depth + "\n");
+        stringBuilder.append(prependBrTag("source language: ") + args.language + "\n");
+        stringBuilder.append(prependBrTag("target language: ") + args.language + "\n");
+        stringBuilder.append(prependBrTag("summary:" + "\n"));
+
+        // add all contents of this and further subpages
+        stringBuilder.append(convertToMarkdown(args.depth));
+        return stringBuilder.toString();
+    }
+
+    private String wrapLinkInATag(String link) {
+        return "<a>" + link + "</a>";
+    }
+
+    private String prependBrTag(String text) {
+        return "<br>" + text;
+    }
+
+    private String convertToMarkdownHeading(Heading heading) {
+        String[] markDownHeadingLevels = new String[]{"#", "##", "###", "####", "#####", "######"};
+        int headingLevel = Character.getNumericValue(heading.tagName.charAt(1));
+        return markDownHeadingLevels[headingLevel - 1] + " " + heading.value;
+    }
+
+
 }

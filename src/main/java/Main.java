@@ -3,7 +3,6 @@ import utils.ArgConverter;
 import utils.Args;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 public class Main {
     public static void main(String[] args) {
@@ -14,7 +13,7 @@ public class Main {
             //call crawler
             Page rootPage = new Page(params.url);
             rootPage.crawl(params.depth);
-            System.out.println("laöjsdlkf");
+            System.out.println(rootPage.convertToMarkdown(params,""));
 
 
         } catch ( IOException e) {
