@@ -4,7 +4,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import utils.Args;
+import utils.CrawlParameters;
 
 import java.io.IOException;
 import java.net.URL;
@@ -49,7 +49,7 @@ public class Page {
      * @param doc current page doc representing html dom
      * @return {Heading} objects
      */
-    private Heading[] getHeadings(Document doc) {
+    public static Heading[] getHeadings(Document doc) {
         Elements allHeadingTags = doc.select("h1, h2, h3, h4, h5, h6");
 
         Heading[] headings = new Heading[allHeadingTags.size()];
@@ -66,7 +66,7 @@ public class Page {
      * @param doc current page doc representing html dom
      * @return {Heading} objects
      */
-    private Page[] getSubpages(Document doc) {
+    public static Page[] getSubpages(Document doc) {
         Elements allLinkTags = doc.select("a");
 
         Page[] subpages = new Page[allLinkTags.size()];
@@ -83,12 +83,7 @@ public class Page {
      * @return {boolean}
      */
     public boolean isLinkBroken() {
-        try {
-            new URL(url);
-            return false;
-        } catch (Exception e) {
-            return true;
-        }
+        return CrawlParameters.isLinkBroken(url);
     }
 
     private String convertToMarkdown(int level) {
@@ -100,8 +95,9 @@ public class Page {
         // print subpages
         for (Page subpage : subpages) {
             // print subpage heading
-            if (subpage.isLinkBroken()) stringBuilder.append(prependBrTag("broken link" + wrapLinkInATag(subpage.url) + "\n"));
-            else stringBuilder.append(prependBrTag("--> link to:" + wrapLinkInATag(subpage.url) + "\n"));
+            if (subpage.isLinkBroken())
+                stringBuilder.append(prependBrTag("broken link" + wrapInATag(subpage.url) + "\n"));
+            else stringBuilder.append(prependBrTag("--> link to:" + wrapInATag(subpage.url) + "\n"));
 
             // as long as we are not at the end of recursion, print subpages too
             if (level > 0 && !subpage.isLinkBroken()) stringBuilder.append(subpage.convertToMarkdown(level - 1));
@@ -110,10 +106,10 @@ public class Page {
 
     }
 
-    public String convertToMarkdown(Args args, String filename) {
+    public String convertToMarkdown(CrawlParameters args, String filename) {
         StringBuilder stringBuilder = new StringBuilder();
         // prepend metadata
-        stringBuilder.append("input: " + wrapLinkInATag(args.url) + "\n");
+        stringBuilder.append("input: " + wrapInATag(args.url) + "\n");
         stringBuilder.append(prependBrTag("depth: ") + args.depth + "\n");
         stringBuilder.append(prependBrTag("source language: ") + args.language + "\n");
         stringBuilder.append(prependBrTag("target language: ") + args.language + "\n");
@@ -124,19 +120,18 @@ public class Page {
         return stringBuilder.toString();
     }
 
-    private String wrapLinkInATag(String link) {
+    public static String wrapInATag(String link) {
         return "<a>" + link + "</a>";
     }
 
-    private String prependBrTag(String text) {
+    public static String prependBrTag(String text) {
         return "<br>" + text;
     }
 
-    private String convertToMarkdownHeading(Heading heading) {
+    public static String convertToMarkdownHeading(Heading heading) {
         String[] markDownHeadingLevels = new String[]{"#", "##", "###", "####", "#####", "######"};
         int headingLevel = Character.getNumericValue(heading.tagName.charAt(1));
         return markDownHeadingLevels[headingLevel - 1] + " " + heading.value;
     }
-
 
 }
